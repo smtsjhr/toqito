@@ -28,6 +28,21 @@ def item_partitions(items : list, parts : int, sizes : list = None) -> list:
 
 def is_unextendible_product_basis(local_states_list : list[np.ndarray]):
 
+    # Input error handling
+    if len(local_states_list) == 0:
+        raise ValueError("Input must be a nonempty list.")
+    for party, states in enumerate(local_states_list):
+        if not isinstance(states, np.ndarray):
+            raise ValueError("Input list elements must be arrays of type numpy.ndarray.")
+        if not len(states.shape) == 2:
+            raise ValueError("Input list arrays must be 2 dimensional.")
+        if states.shape[0] == 0 or states.shape[1] == 0:
+            raise ValueError("Input list arrays must have nonzero components in each dimension.")
+        if party == 0:
+            num_cols_first_party = states.shape[1]
+        if not states.shape[1] == num_cols_first_party:
+            raise ValueError("Input list arrays must have the same number of columns.")
+
     num_parties = len(local_states_list)
     num_states = local_states_list[0].shape[1]
     local_dimensions = [party.shape[0] for party in local_states_list]
