@@ -5,7 +5,7 @@ import numpy as np
 from scipy.linalg import null_space
 
 
-def item_partitions(items, parts, sizes = None ):
+def item_partitions(items : list, parts : int, sizes : list = None) -> list:
     if sizes == None:
         sizes = [1]*parts
 
@@ -26,11 +26,11 @@ def item_partitions(items, parts, sizes = None ):
     return partitions
 
 
-def is_unextendible_product_basis(local_vectors):
+def is_unextendible_product_basis(local_states_list : list[np.ndarray]):
 
-    num_parties = len(local_vectors)
-    num_states = local_vectors[0].shape[1]
-    local_dimensions = [party.shape[0] for party in local_vectors]
+    num_parties = len(local_states_list)
+    num_states = local_states_list[0].shape[1]
+    local_dimensions = [party.shape[0] for party in local_states_list]
     state_index = [i for i in range(num_states)]
 
     partitions = item_partitions(state_index, num_parties, [dim - 1 for dim in local_dimensions])
@@ -39,40 +39,40 @@ def is_unextendible_product_basis(local_vectors):
     if num_partitions == 0:
         isUPB = False
         orth_states= []
-        num_orth = 0
+        num_orth_states = 0
         for party in range(num_parties):
-            if num_orth >= num_states:
+            if num_orth_states >= num_states:
                 orth_state = np.zeros((local_dimensions[party], 1))
                 orth_state[party][1] = 1
-                witness.append(orth_state)
+                orth_states.append(orth_state)
             else:
-                more_orth = min([local_dimensions[party] - 1, num_states - num_orth])
-                local_choices = [num_orth + i for i in range(more_orth + 1)]
-                local_states = local_vectors[party][:, local_choices]
+                more_orth_states = min([local_dimensions[party] - 1, num_states - num_orth_states])
+                local_choices = [num_orth_states + i for i in range(more_orth_states + 1)]
+                local_states = local_states_list[party][:, local_choices]
                 local_orth_states = null_space(local_states.T)
                 if local_orth_states.size == 0:
                     orth_states.append([])
                 else:
                     orth_states.append(local_orth_states[:, 0])
-                num_orth += more_orth
+                num_orth_states += more_orth_states
         witness = orth_states
         return (isUPB, witness)
 
 
     for partition in partitions:
-        num_orth_states = 1
         orth_states = []
-        for party, states in enumerate(local_vectors):
+        num_orth_states = 1
+        for party, states in enumerate(local_states_list):
             local_choices = partition[party]
-            local_states = states[ : , local_choices]
+            local_states = states[:, local_choices]
             local_orth_states = null_space(local_states.T)
             if local_orth_states.size == 0:
                 num_local_orth_states = 0
             else:
                 num_local_orth_states = local_orth_states.shape[1]
-            num_orth_states *= num_local_orth_states
+            num_orth_states *= num_local_orth_states    
             if num_orth_states == 0:
-                break    
+                break     
             orth_states.append(local_orth_states[:, 0])    
         if num_orth_states >= 1:
             isUPB = False
