@@ -58,7 +58,7 @@ def is_unextendible_product_basis(local_states_list : list[np.ndarray]):
         for party in range(num_parties):
             if num_orth_states >= num_states:
                 orth_state = np.zeros((local_dimensions[party], 1))
-                orth_state[party] = 1
+                orth_state[party][0] = 1
                 orth_states.append(orth_state)
             else:
                 more_orth_states = min([local_dimensions[party] - 1, num_states - num_orth_states])
@@ -68,7 +68,7 @@ def is_unextendible_product_basis(local_states_list : list[np.ndarray]):
                 if local_orth_states.size == 0:
                     orth_states.append([])
                 else:
-                    orth_states.append(local_orth_states[:, 0])
+                    orth_states.append(np.array([local_orth_states[:, 0]]).T)
                 num_orth_states += more_orth_states
         witness = orth_states
         return (isUPB, witness)
@@ -87,7 +87,7 @@ def is_unextendible_product_basis(local_states_list : list[np.ndarray]):
             num_orth_states *= num_local_orth_states    
             if num_orth_states == 0:
                 break     
-            orth_states.append(local_orth_states[:, 0])    
+            orth_states.append(np.array([local_orth_states[:, 0]]).T)    
         if num_orth_states >= 1:
             isUPB = False
             witness = orth_states
