@@ -1,10 +1,26 @@
 """Test is_unextendible_product_basis."""
 import numpy as np
+import pytest
 
 from toqito.state_props.is_unextendible_product_basis import is_unextendible_product_basis
+from toqito.matrix_ops import tensor
+from toqito.matrix_ops import inner_product
 
-def test_is_unextendible_product_basis_something():
-    np.testing.assert_array_equal(True, True)
+
+tiles_A = np.zeros([3,5])
+tiles_A[:, 0] = [1, 0, 0]
+tiles_A[:, 1] = [1/np.sqrt(2), -1/np.sqrt(2), 0]
+tiles_A[:, 2] = [0, 0, 1]
+tiles_A[:, 3] = [0, 1/np.sqrt(2), -1/np.sqrt(2)]
+tiles_A[:, 4] = [1/np.sqrt(3), 1/np.sqrt(3), 1/np.sqrt(3)]
+
+tiles_B = np.zeros([3,5])
+tiles_B[:, 0] = [1/np.sqrt(2), -1/np.sqrt(2), 0]
+tiles_B[:, 1] = [0, 0, 1]
+tiles_B[:, 2] = [0, 1/np.sqrt(2), -1/np.sqrt(2)]
+tiles_B[:, 3] = [1, 0, 0]
+tiles_B[:, 4] = [1/np.sqrt(3), 1/np.sqrt(3), 1/np.sqrt(3)]
+
 
 def test_is_unextendible_product_basis_input_empty_list():
     with np.testing.assert_raises(ValueError):
@@ -29,6 +45,28 @@ def test_is_unextendible_product_basis_input_arrays_not_same_num_columns():
         input = [array_1, array_2]
         is_unextendible_product_basis(input)
 
+def test_is_unextendable_product_basis_tiles():
+    res = is_unextendible_product_basis([tiles_A, tiles_B])
+    expected_res = [True, None]
+    np.testing.assert_array_equal([res[0], res[1]], expected_res)
+
+@pytest.mark.parametrize("num_states", [1, 2, 3, 4])
+def test_is_unextendable_product_basis_tiles_remove_states_false(num_states):
+    res = is_unextendible_product_basis([tiles_A[:, 0:num_states], tiles_B[:, 0:num_states]])
+    expected_res = False
+    np.testing.assert_equal(res[0], expected_res)
+
+@pytest.mark.parametrize("num_states", [1, 2, 3, 4])
+def test_is_unextendable_product_basis_tiles_remove_states_orthogonal_witness(num_states):
+    witness = is_unextendible_product_basis([tiles_A[:, 0:num_states], tiles_B[:, 0:num_states]])[1]
+    witness_product = tensor(witness[0], witness[1])
+    ip_list = []
+    for i in range(num_states):
+        UPB_product = tensor(np.array([tiles_A[:, i]]).T, np.array([tiles_B[:, i]]).T)
+        ip = inner_product(witness_product[:,0], UPB_product[:, 0])
+        ip_list.append(ip)
+    expected_res = [0]*num_states
+    np.testing.assert_array_almost_equal(ip, expected_res)
 
 
 if __name__ == "__main__":
