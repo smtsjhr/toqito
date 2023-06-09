@@ -6,27 +6,31 @@ from toqito.state_props.is_unextendible_product_basis import is_unextendible_pro
 from toqito.matrix_ops import tensor
 from toqito.matrix_ops import inner_product
 
+def Tiles():
+    tiles_A = np.zeros([3,5])
+    tiles_A[:, 0] = [1, 0, 0]
+    tiles_A[:, 1] = [1/np.sqrt(2), -1/np.sqrt(2), 0]
+    tiles_A[:, 2] = [0, 0, 1]
+    tiles_A[:, 3] = [0, 1/np.sqrt(2), -1/np.sqrt(2)]
+    tiles_A[:, 4] = [1/np.sqrt(3), 1/np.sqrt(3), 1/np.sqrt(3)]
 
-tiles_A = np.zeros([3,5])
-tiles_A[:, 0] = [1, 0, 0]
-tiles_A[:, 1] = [1/np.sqrt(2), -1/np.sqrt(2), 0]
-tiles_A[:, 2] = [0, 0, 1]
-tiles_A[:, 3] = [0, 1/np.sqrt(2), -1/np.sqrt(2)]
-tiles_A[:, 4] = [1/np.sqrt(3), 1/np.sqrt(3), 1/np.sqrt(3)]
+    tiles_B = np.zeros([3,5])
+    tiles_B[:, 0] = [1/np.sqrt(2), -1/np.sqrt(2), 0]
+    tiles_B[:, 1] = [0, 0, 1]
+    tiles_B[:, 2] = [0, 1/np.sqrt(2), -1/np.sqrt(2)]
+    tiles_B[:, 3] = [1, 0, 0]
+    tiles_B[:, 4] = [1/np.sqrt(3), 1/np.sqrt(3), 1/np.sqrt(3)]
 
-tiles_B = np.zeros([3,5])
-tiles_B[:, 0] = [1/np.sqrt(2), -1/np.sqrt(2), 0]
-tiles_B[:, 1] = [0, 0, 1]
-tiles_B[:, 2] = [0, 1/np.sqrt(2), -1/np.sqrt(2)]
-tiles_B[:, 3] = [1, 0, 0]
-tiles_B[:, 4] = [1/np.sqrt(3), 1/np.sqrt(3), 1/np.sqrt(3)]
-
+    return [tiles_A, tiles_B]
+    
 def GenShifts(parties):
     k = int((parties + 1)/2)
     num_states = 2*k
     upb = [np.zeros([2, num_states]) for _ in range(parties)]
-    local_states = [[np.cos(angle), np.sin(angle)] for angle in [(i/k)*np.pi/2 for i in range(2*k - 1, k, -1)] ]
-    orth_local_states = [[np.cos(angle), np.sin(angle)] for angle in [(i/k)*np.pi/2 for i in range(1,k)] ]
+    angles = [(i/k)*np.pi/2 for i in range(2*k - 1, k, -1)]
+    local_states = [[np.cos(angle), np.sin(angle)] for angle in angles ]
+    orth_angles = [(i/k)*np.pi/2 for i in range(1,k)]
+    orth_local_states = [[np.cos(angle), np.sin(angle)] for angle in orth_angles]
 
     state_list = []
     state_list.append([0,1])
@@ -68,23 +72,25 @@ def test_is_unextendible_product_basis_input_arrays_not_same_num_columns():
         is_unextendible_product_basis(input)
 
 def test_is_unextendable_product_basis_tiles():
-    res = is_unextendible_product_basis([tiles_A, tiles_B])
+    res = is_unextendible_product_basis(Tiles())
     expected_res = [True, None]
     np.testing.assert_array_equal(res, expected_res)
 
 @pytest.mark.parametrize("num_states", [1, 2, 3, 4])
 def test_is_unextendable_product_basis_tiles_remove_states_false(num_states):
-    res = is_unextendible_product_basis([tiles_A[:, 0:num_states], tiles_B[:, 0:num_states]])
+    tiles = Tiles()
+    res = is_unextendible_product_basis([tiles[0][0:, 0:num_states], tiles[1][:, 0:num_states]])
     expected_res = False
     np.testing.assert_equal(res[0], expected_res)
 
 @pytest.mark.parametrize("num_states", [1, 2, 3, 4])
 def test_is_unextendable_product_basis_tiles_remove_states_orthogonal_witness(num_states):
-    witness = is_unextendible_product_basis([tiles_A[:, 0:num_states], tiles_B[:, 0:num_states]])[1]
+    tiles = Tiles()
+    witness = is_unextendible_product_basis([tiles[0][:, 0:num_states], tiles[1][:, 0:num_states]])[1]
     witness_product = tensor(witness[0], witness[1])
     ip_list = []
     for i in range(num_states):
-        UPB_product = tensor(np.array([tiles_A[:, i]]).T, np.array([tiles_B[:, i]]).T)
+        UPB_product = tensor(np.array([tiles[0][:, i]]).T, np.array([tiles[1][:, i]]).T)
         ip = inner_product(witness_product[:,0], UPB_product[:, 0])
         ip_list.append(ip)
     expected_res = [0]*num_states
