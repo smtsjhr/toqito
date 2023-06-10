@@ -1,4 +1,4 @@
-"""Check if a collection of vectors is an Unextendable Product Basis (UBP)."""
+"""Check if a collection of states is an Unextendable Product Basis (UBP)."""
 
 from itertools import combinations
 import numpy as np
@@ -27,6 +27,27 @@ def item_partitions(items : list, parts : int, sizes : list = None) -> list:
 
 
 def is_unextendible_product_basis(local_states_list : list[np.ndarray]):
+    """
+    Determine if a collection of states is an Unextendible Product Basis (UBP) [UPB99]_.
+
+    
+
+    This function was adapted from QETLAB [Joh16]_.
+
+    References
+    ==========
+    ..  [UPB99] Bennett, Charles H., et al.
+        "Unextendible product bases and bound entanglement."
+        Physical Review Letters 82.26 (1999): 5385.
+        https://arxiv.org/abs/quant-ph/9808030
+    .. [Joh16] Nathaniel Johnston.
+        "QETLAB: A MATLAB toolbox for quantum entanglement"
+        http://www.qetlab.com
+
+    :raises ValueError: If list elements are not of type numpy.ndarray with two dimensions and the same number of columns.
+    :param local_states_list: The list of states to check.
+    :return: :code:`(True, None)` if states form an a UPB and :code:`(False, wittness)` otherwise.
+    """
 
     # Input error handling
     if len(local_states_list) == 0:
