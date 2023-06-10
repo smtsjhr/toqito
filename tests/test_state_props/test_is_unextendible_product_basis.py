@@ -1,4 +1,5 @@
 """Test is_unextendible_product_basis."""
+
 import numpy as np
 import pytest
 
@@ -88,13 +89,15 @@ def test_is_unextendable_product_basis_tiles_remove_states_orthogonal_witness(nu
     tiles = Tiles()
     witness = is_unextendible_product_basis([tiles[0][:, 0:num_states], tiles[1][:, 0:num_states]])[1]
     witness_product = tensor(witness[0], witness[1])
-    ip_list = []
+    # Perhaps we can use `toqito.state_props.is_mutually_orthogonal` to test orthogonallity
+    inner_product_list = []
     for i in range(num_states):
-        UPB_product = tensor(np.array([tiles[0][:, i]]).T, np.array([tiles[1][:, i]]).T)
-        ip = inner_product(witness_product[:,0], UPB_product[:, 0])
-        ip_list.append(ip)
+        UPB_state_product = tensor(np.array([tiles[0][:, i]]).T, np.array([tiles[1][:, i]]).T)
+        ip = inner_product(witness_product[:,0], UPB_state_product[:, 0])
+        inner_product_list.append(ip)
+    res = inner_product_list
     expected_res = [0]*num_states
-    np.testing.assert_array_almost_equal(ip, expected_res)
+    np.testing.assert_array_almost_equal(res, expected_res)
 
 @pytest.mark.parametrize("num_parties", [3, 5, 7])
 def test_is_unextendable_product_basis_tiles_GenShifts(num_parties):
