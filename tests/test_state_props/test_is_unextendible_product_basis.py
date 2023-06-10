@@ -24,7 +24,11 @@ def Tiles():
 
     return [tiles_A, tiles_B]
     
-def GenShifts(parties):
+def GenShifts(parties : int):
+
+    if (parties % 2 == 0) or parties == 1:
+        raise ValueError("Input must be an odd int greater than 1.")
+    
     k = int((parties + 1)/2)
     num_states = 2*k
     upb = [np.zeros([2, num_states]) for _ in range(parties)]
