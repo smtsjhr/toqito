@@ -5,7 +5,24 @@ import numpy as np
 from scipy.linalg import null_space
 
 
-def item_partitions(items : list, parts : int, sizes : list = None) -> list:
+def item_partitions(items : list, parts : int, sizes : list[int] = None) -> list:
+    r"""
+    Constructs all partitions of a given list into a specified number of parts with given sizes.
+
+    This function was adapted from QETLAB [Joh16]_.
+
+    References
+    ==========
+    .. [Joh16] Nathaniel Johnston.
+        "QETLAB: A MATLAB toolbox for quantum entanglement"
+        http://www.qetlab.com
+
+    :param items: The list of items to partition.
+    :param parts: The number of parts in the partition.
+    :param sizes: A list of positive integers specifying the minimum sizes of the parts.
+    :return: A list of partitions.
+    """
+
     if sizes == None:
         sizes = [1]*parts
 
@@ -27,10 +44,8 @@ def item_partitions(items : list, parts : int, sizes : list = None) -> list:
 
 
 def is_unextendible_product_basis(local_states_list : list[np.ndarray]):
-    """
+    r"""
     Determine if a collection of states is an Unextendible Product Basis (UBP) [UPB99]_.
-
-    
 
     This function was adapted from QETLAB [Joh16]_.
 
