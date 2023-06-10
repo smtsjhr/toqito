@@ -8,6 +8,7 @@ from toqito.matrix_ops import tensor
 from toqito.matrix_ops import inner_product
 
 def Tiles():
+    """Constructs Tiles UPB."""
     tiles_A = np.zeros([3,5])
     tiles_A[:, 0] = [1, 0, 0]
     tiles_A[:, 1] = [1/np.sqrt(2), -1/np.sqrt(2), 0]
@@ -25,7 +26,7 @@ def Tiles():
     return [tiles_A, tiles_B]
     
 def GenShifts(parties : int):
-
+    """Constructs GenShifts UPB for odd number of parties."""
     if (parties % 2 == 0) or parties == 1:
         raise ValueError("Input must be an odd int greater than 1.")
     
@@ -54,22 +55,26 @@ def GenShifts(parties : int):
 
 
 def test_is_unextendible_product_basis_input_empty_list():
+    """Empty list as input."""
     with np.testing.assert_raises(ValueError):
         empty_list = []
         is_unextendible_product_basis(empty_list)
 
 def test_is_unextendible_product_basis_input_not_numpy_arrays():
+    """List elements are not type numpy.ndarray."""
     with np.testing.assert_raises(ValueError):
         list_of_listarrays = [[[1, 2], [3, 4]],[[5, 6], [7, 8]] ]
         is_unextendible_product_basis(list_of_listarrays)
 
 def test_is_unextendible_product_basis_input_arrays_not_two_dimensional():
+    """Arrays are not two-dimensional."""
     with np.testing.assert_raises(ValueError):
         array_1D = np.array([1, 2, 3, 4])
         input = [array_1D, array_1D ]
         is_unextendible_product_basis(input)
 
 def test_is_unextendible_product_basis_input_arrays_not_same_num_columns():
+    """Arrays do not have the same number of columns"""
     with np.testing.assert_raises(ValueError):
         array_1 = np.array([[1, 2], [3, 4]])
         array_2 = np.array([[1], [3]])
@@ -77,12 +82,14 @@ def test_is_unextendible_product_basis_input_arrays_not_same_num_columns():
         is_unextendible_product_basis(input)
 
 def test_is_unextendable_product_basis_tiles():
+    """Verify if Tiles UPB is a UPB"""
     res = is_unextendible_product_basis(Tiles())
     expected_res = [True, None]
     np.testing.assert_array_equal(res, expected_res)
 
 @pytest.mark.parametrize("num_states", [1, 2, 3, 4])
 def test_is_unextendable_product_basis_tiles_remove_states_false(num_states):
+    """Check if Tiles UPB fails to be a UPB when 1, 2, 3, and 4 states are removed."""
     tiles = Tiles()
     res = is_unextendible_product_basis([tiles[0][0:, 0:num_states], tiles[1][:, 0:num_states]])
     expected_res = False
@@ -90,6 +97,7 @@ def test_is_unextendable_product_basis_tiles_remove_states_false(num_states):
 
 @pytest.mark.parametrize("num_states", [1, 2, 3, 4])
 def test_is_unextendable_product_basis_tiles_remove_states_orthogonal_witness(num_states):
+    """Check if witness is orthogonal to Tiles UPB when 1, 2, 3, and 4 states are removed."""
     tiles = Tiles()
     witness = is_unextendible_product_basis([tiles[0][:, 0:num_states], tiles[1][:, 0:num_states]])[1]
     witness_product = tensor(witness[0], witness[1])
@@ -105,6 +113,7 @@ def test_is_unextendable_product_basis_tiles_remove_states_orthogonal_witness(nu
 
 @pytest.mark.parametrize("num_parties", [3, 5, 7])
 def test_is_unextendable_product_basis_tiles_GenShifts(num_parties):
+    """Verify if GenShifts UPB is a UPB for 3, 5, and, 7 parties"""
     res = is_unextendible_product_basis(GenShifts(num_parties))
     expected_res = [True, None]
     np.testing.assert_array_equal(res, expected_res)
